@@ -15,6 +15,6 @@ Klijent će se po potrebi spajati na idućeg klijenta (zadanog IP adresom i port
 
 ### Task 2
 ## Web Crawler
-Realizirati aplikaciju za otkrivanje i popisivanje sadržaja povezanih linkovima (pojednostavljeni WebSpider ili WebCrawler). Aplikacija će kretati od zadane adrese (www.sheldonbrown.com), primiti odgovor (u obliku HTTP odgovora sa HTML stranicom) i popisati sve linkove obradom odgovora. Nakon toga za svaki popisani link ponoviti postupak slanja zahtjeva na istu adresu sa različitom putanjom.
+Realizirati aplikaciju za otkrivanje i popisivanje sadržaja povezanih linkovima (pojednostavljeni WebSpider ili WebCrawler). Aplikacija će kretati od zadane adrese, primiti odgovor (u obliku HTTP odgovora sa HTML stranicom) i popisati sve linkove obradom odgovora. Nakon toga za svaki popisani link ponoviti postupak slanja zahtjeva na istu adresu sa različitom putanjom.
 Ograničiti broj posjećenih linkova na 50 i sve linkove na kraju treba ispisati na konzoli. Ovisno o implementaciji, svi linkovi se neće uspjeti dohvatiti (provjeriti da li je status odgovora „200 OK“), takve linkove se može ignorirati.
 Da bi se izbjeglo kruženje, prije dodavanja linka u listu provjerite da li se link već nalazi u listi. 
