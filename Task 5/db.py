@@ -1,7 +1,8 @@
 #!C:\Users\nikol\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.8_qbz5n2kfra8p0\python.exe
 import mysql.connector  
 import json
-import password_utils
+import password_utils, os
+from datetime import datetime
 
 db_conf = {
     "host":"localhost",
@@ -42,12 +43,7 @@ def get_session(session_id):
     myresult = cursor.fetchone()
     return myresult[0], json.loads(myresult[1])
 
-def get_collections():
-    mydb = get_DB_connection()
-    cursor = mydb.cursor()
-    cursor.execute("SELECT * FROM collections")
-    myresult = cursor.fetchall()
-    return myresult
+
 
 def get_paths(collection_id):
     mydb = get_DB_connection()
@@ -59,15 +55,6 @@ def get_paths(collection_id):
 def upload(path, collection_id):
     query = "INSERT INTO image (path, collection_id) VALUES (%s, %s)"
     values = (path,collection_id,)
-    mydb = get_DB_connection()
-    cursor = mydb.cursor()
-    cursor.execute(query, values)
-    mydb.commit()
-    return cursor.lastrowid 
-
-def create_collection(collection):
-    query = "INSERT INTO collections (collection) VALUES (%s)"
-    values = (collection,)
     mydb = get_DB_connection()
     cursor = mydb.cursor()
     cursor.execute(query, values)
@@ -124,3 +111,84 @@ def get_hash(username):
     cursor.execute("SELECT password FROM users WHERE username='" + str(username) + "'")
     myresult = cursor.fetchone()
     return myresult
+
+def create_collection(collection):
+    query = "INSERT INTO collections (collection) VALUES (%s)"
+    values = (collection,)
+    mydb = get_DB_connection()
+    cursor = mydb.cursor()
+    cursor.execute(query, values)
+    mydb.commit()
+    return cursor.lastrowid 
+
+def get_collections():
+    mydb = get_DB_connection()
+    cursor = mydb.cursor()
+    cursor.execute("SELECT * FROM collections")
+    myresult = cursor.fetchall()
+    return myresult
+
+def save_collection(collection_name):
+    mydb = get_DB_connection()  
+    cursor = mydb.cursor()
+    maybe = get_collection_id_by_name(collection_name)
+
+    if not maybe:
+        try:
+            query = "INSERT INTO collections (collection) VALUES (%s)"
+            values = (collection_name,)
+            cursor.execute(query, values)
+            mydb.commit()
+        except:
+            print("What the fuck")
+            print("INSERT INTO collections (collection_name) VALUES ('%s')" % collection_name)
+            return None
+        os.mkdir('../slike/' + str(collection_name))
+        return cursor.lastrowid
+    else :
+        return maybe[0]
+
+def get_collection_id_by_name(collection_name):
+    mydb = get_DB_connection()
+    cursor = mydb.cursor()
+    cursor.execute("Select * from collections where collection = '%s'" % collection_name)
+    coll_id = cursor.fetchone()
+    return coll_id
+
+def save_image(file, collection_id):
+    mydb = get_DB_connection()
+    cursor = mydb.cursor()
+    cursor.execute("INSERT into image(path, counter, created, last, collection_id) VALUES('%s', % d, '%s', '%s', '%s')" % (
+        file.filename, 0, str(datetime.now()), str(datetime.now()), collection_id))
+    mydb.commit()
+    return cursor.lastrowid
+
+def get_image_by_path(path):
+    mydb = get_DB_connection()
+    cursor = mydb.cursor()
+    cursor.execute("SELECT * FROM image WHERE path='%s'" % path)
+    myresult = cursor.fetchone()
+    return myresult
+
+def get_images():
+    mydb = get_DB_connection()
+    cursor = mydb.cursor()
+    cursor.execute("SELECT * FROM image")
+    myresult = cursor.fetchall()
+    return myresult
+
+def visit_image(image_id):
+    mydb = get_DB_connection()
+    cursor = mydb.cursor()
+    cursor.execute("UPDATE image SET counter = counter + 1, last = '%s' WHERE id=%d" % (str(datetime.now()) , image_id))
+    mydb.commit()
+
+def delete_image(img_id):
+    mydb = get_DB_connection()
+    cursor = mydb.cursor()
+    try:
+        cursor.execute("DELETE FROM image where id = %s" % str(img_id))
+        mydb.commit()
+        return True
+    except:
+        return False

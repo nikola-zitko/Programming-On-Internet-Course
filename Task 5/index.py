@@ -13,8 +13,19 @@ params = cgi.FieldStorage()
 if (os.environ["REQUEST_METHOD"].upper() == "POST"):
     if "create" in params:
         collection = db.create_collection(params.getvalue("name"))
-    
-    
+    elif "upload" in params:
+        
+        file_item = params["slika"]
+        if file_item.filename:
+            fn = ('../slike/')
+            fn += os.path.basename(file_item.filename)
+            db.save_image(file_item, session.get_collection_id(session.get_session_id()))
+            open(fn, 'wb').write(file_item.file.read(250000))
+            message = 'The file "' + fn + '" was uploaded successfully'
+            collection = session.get_collection_id(session.get_session_id())
+        
+        else:
+            message = "No file was uploaded"
     else:
         collection = params.getvalue("collection")
     session.set_collection_id(collection)
@@ -46,34 +57,23 @@ print('''<form method="POST">
 
 c_id = session.get_collection_id(session.get_session_id)
 for path in db.get_paths(c_id):
-    print('<img  src="../slike/' + path[0] +  '" width=130 height=200>' + path[0] + '<br>')
-if (request_type == "POST" and "update" in params):
+    print('<form action="slika.py" method="POST" target="_blank" style="display: inline;">')
+    print('<button type="submit">')
+    print('<img  src="../slike/' + path[0] +  '" width=130 height=200>' + path[0])
+    print('<input type="hidden" name="image" value="%s"/>' % path[0])
+    print('</button>')
+    print("</form>")
 
-    file_item = params["slika"]
-    if (file_item.filename):
-        print('ime file-a ' + file_item.filename)
-        print("<br>")
-        #print(file_item.file)
-    else:
-        print ("<div>GRESKA!!</div>")
-
-    if file_item.filename:
-        fn = '../slike/'
-        fn += os.path.basename(file_item.filename)
-
-        open(fn, 'wb').write(file_item.file.read(250000))
-        message = 'The file "' + fn + '" was uploaded successfully'
-    else:
-        message = "No file was uploaded"
 print('<form enctype="multipart/form-data" method="POST">')
 print('<input type="file"  name="slika" accept="image/png, image/jpeg">')
-print('<input type="submit" value="upload">')
+print('<input type="submit" name="upload" value="Upload">')
 print('</form>')
-
-
-print('<a class="btn" href="logout.py">Logout</a>')
+print('<br>')
+print('<a href="pregled.py">Counter</a>')
 print('<br><br>')
-print('<a class="btn" href="setname.py">Change password</a>')
+print('<a href="logout.py">Logout</a>')
+print('<br><br>')
+print('<a href="setname.py">Change password</a>')
 
 
 if (os.environ["REQUEST_METHOD"].upper() == "POST"):
